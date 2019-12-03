@@ -1,4 +1,5 @@
 import pandas as pd
+import torch
 import torchtext
 from torchtext import data
 from Tokenize import tokenize
@@ -57,6 +58,8 @@ def create_dataset(opt, SRC, TRG):
     df = pd.DataFrame(raw_data, columns=["src", "trg"])
     
     mask = (df['src'].str.count(' ') < opt.max_strlen) & (df['trg'].str.count(' ') < opt.max_strlen)
+    import pdb
+    #pdb.set_trace()
     df = df.loc[mask]
 
     df.to_csv("translate_transformer_temp.csv", index=False)
@@ -64,11 +67,15 @@ def create_dataset(opt, SRC, TRG):
     data_fields = [('src', SRC), ('trg', TRG)]
     train = data.TabularDataset('./translate_transformer_temp.csv', format='csv', fields=data_fields)
 
-    train_iter = MyIterator(train, batch_size=opt.batchsize, device=opt.device,
+    # train_iter = MyIterator(train, batch_size=opt.batchsize, device=opt.device,
+    #                     repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
+    #                     batch_size_fn=batch_size_fn, train=True, shuffle=True)
+
+    train_iter = MyIterator(train, batch_size=opt.batchsize, device=torch.device('cuda'),
                         repeat=False, sort_key=lambda x: (len(x.src), len(x.trg)),
                         batch_size_fn=batch_size_fn, train=True, shuffle=True)
     
-    os.remove('translate_transformer_temp.csv')
+    #os.remove('translate_transformer_temp.csv')
 
     if opt.load_weights is None:
         SRC.build_vocab(train)

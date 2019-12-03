@@ -22,7 +22,8 @@ class Norm(nn.Module):
         return norm
 
 def attention(q, k, v, d_k, mask=None, dropout=None):
-    
+    import pdb
+    #pdb.set_trace()
     scores = torch.matmul(q, k.transpose(-2, -1)) /  math.sqrt(d_k)
     
     if mask is not None:
@@ -51,11 +52,13 @@ class MultiHeadAttention(nn.Module):
         
         self.dropout = nn.Dropout(dropout)
         self.out = nn.Linear(d_model, d_model)
-    
+        
     def forward(self, q, k, v, mask=None):
         
         bs = q.size(0)
-        
+        print(k.shape)
+        import pdb
+        pdb.set_trace()
         # perform linear operation and split into N heads
         k = self.k_linear(k).view(bs, -1, self.h, self.d_k)
         q = self.q_linear(q).view(bs, -1, self.h, self.d_k)
